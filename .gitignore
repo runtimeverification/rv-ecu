@@ -1,1 +1,11 @@
 can-bridge/Project/examples/
+*.swp
+# build artifacts
+*.o
+*.d
+*.map
+*.axf
+*.lst
+*.lnp
+*.htm
+*.dep
