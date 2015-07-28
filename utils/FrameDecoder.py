@@ -44,6 +44,7 @@ if __name__ == '__main__':
                 print 'TxMessage.Data[%s] = 0x%s;\r' % (i, hexNum)
                 i += 1
             print 'CAN_Transmit(CANx, &TxMessage);\r'
+            print 'Delay();Delay();Delay(); // jank'
             print '\r\n' # newlines in Windows format :(
 
     print 'Frames in action log file that are not in idle log file:'
