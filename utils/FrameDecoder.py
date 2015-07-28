@@ -27,8 +27,8 @@ if __name__ == '__main__':
     parser.add_option('-i', '--idle-log', dest='idle_log',
             help='contains frames generated when car is idling')
     parser.add_option('-a', '--action-log', dest='action_log',
-            help='contains frames generated when car does action we want to \
-            reverse engineer')
+            help='contains frames generated when car does action we want to '\
+            'reverse engineer')
     (options, args) = parser.parse_args()
 
     diff = Diff(options.idle_log, options.action_log)
