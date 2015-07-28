@@ -1,13 +1,15 @@
 #!/usr/bin/python
 from optparse import OptionParser
 
-def Diff(idle_log, action_log):
-    action_set = set(_process(open(action_log, 'r')))
+def Diff(idle_log, action_log): # finds in order diff
+    action_info = _process(open(action_log, 'r'))
+    action_set = set(action_info)
     idle_set = set(_process(open(idle_log, 'r')))
     uniques = action_set - action_set.intersection(idle_set)
-    return uniques
+    order = sorted([action_info.index(item) for item in uniques])
+    return [action_info[idx] for idx in order]
 
-def _process(log_file):
+def _process(log_file): # puts relevant fields in tuples
     info = list()
     for line in log_file:
         if "Index" in line:
@@ -15,9 +17,23 @@ def _process(log_file):
         fields = [item.strip() for item in line.split(',')]
         try:
             info.append(tuple([fields[3], fields[4], fields[5], fields[6]]))
-        except Exception as e:
-            print 'error %s on line #%s' % (e, str(fields[0]))
+        except Exception:
+            pass # deals with random garbage USB-CANII puts in log
+
     return info
+
+def _code_gen(diff): # prints C code for writing the diff over CAN
+    for item in diff:
+        print 'TxMessage.ExtId = %s;\r' % item[1]
+        print 'TxMessage.DLC = %s;\r' % item[2]
+        data = item[3].split('  ')
+        i = 0
+        for hexNum in data:
+            print 'TxMessage.Data[%s] = 0x%s;\r' % (i, hexNum)
+            i += 1
+        print 'CAN_Transmit(CANx, &TxMessage);\r'
+        print 'waitForPress();'
+        print '\r\n' # newlines in Windows format :(
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -34,19 +50,9 @@ if __name__ == '__main__':
     diff = Diff(options.idle_log, options.action_log)
 
     if options.do_codegen:
-        print 'Copy and Paste the following into main.c in canbridge:'
-        for item in diff:
-            print 'TxMessage.ExtId = %s;\r' % item[1]
-            print 'TxMessage.DLC = %s;\r' % item[2]
-            data = item[3].split('  ')
-            i = 0
-            for hexNum in data:
-                print 'TxMessage.Data[%s] = 0x%s;\r' % (i, hexNum)
-                i += 1
-            print 'CAN_Transmit(CANx, &TxMessage);\r'
-            print 'Delay();Delay();Delay(); // jank'
-            print '\r\n' # newlines in Windows format :(
+        _code_gen(diff)
 
-    print 'Frames in action log file that are not in idle log file:'
-    for item in diff:
-        print item
+    else:
+        print 'Frames in action log file that are not in idle log file:'
+        for item in diff:
+            print item
