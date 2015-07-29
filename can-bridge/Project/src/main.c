@@ -81,50 +81,32 @@ void Delay(void);
   * @retval None
   */
 int main(void)
-{
-  /*!< At this stage the microcontroller clock setting is already configured, 
-       this is done through SystemInit() function which is called from startup
-       file (startup_stm32f10x_xx.s) before to branch to application main.
-       To reconfigure the default setting of SystemInit() function, refer to
-       system_stm32f10x.c file
-     */     
-       
+{       
   /* NVIC configuration */
   NVIC_Config();
 
 	STM3210C_LCD_Init();
   LCD_Clear(LCD_COLOR_WHITE);
-
-  /* Set the LCD Back Color */
   LCD_SetBackColor(LCD_COLOR_RED);
-  /* Set the LCD Text Color */
   LCD_SetTextColor(LCD_COLOR_GREEN);
   LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "CAN Bus Messages");
-  /* CAN configuration */
+	
+	STM_EVAL_PBInit(BUTTON_KEY, BUTTON_MODE_GPIO); 
+
   CAN_Config();
   
   CAN_ITConfig(CANx, CAN_IT_FMP0, ENABLE);
- 
-  /* Infinite loop */
-  while(1)
-  {
-		while(STM_EVAL_PBGetState(BUTTON_KEY) == KEY_PRESSED)
-    {
-			memcpy((void *) TxMessage.Data, (void *) RxMessage.Data, 8);
-			TxMessage.DLC = RxMessage.DLC;
-			TxMessage.ExtId = RxMessage.ExtId;
-			TxMessage.IDE = RxMessage.ExtId;
-			TxMessage.RTR = RxMessage.RTR;
-			TxMessage.StdId = RxMessage.StdId;
-			
-      CAN_Transmit(CANx, &TxMessage);
-      Delay();
-        
-      while(STM_EVAL_PBGetState(BUTTON_KEY) != KEY_NOT_PRESSED)
-      {
-      }
-    }
-  }
+	
+	// #include of frame decoder generated file goes here
+}
+
+void waitForPress() {
+	while(STM_EVAL_PBGetState(BUTTON_KEY) == KEY_PRESSED)
+	{        
+		while(STM_EVAL_PBGetState(BUTTON_KEY) != KEY_NOT_PRESSED)
+		{
+		}
+	}
 }
 
 /**
