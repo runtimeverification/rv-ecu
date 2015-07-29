@@ -23,6 +23,7 @@ def _process(log_file): # puts relevant fields in tuples
     return info
 
 def _code_gen(diff): # prints C code for writing the diff over CAN
+    print 'waitForPress();'
     for item in diff:
         print 'TxMessage.ExtId = %s;\r' % item[1]
         print 'TxMessage.DLC = %s;\r' % item[2]
