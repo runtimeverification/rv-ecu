@@ -22,8 +22,11 @@ def _process(log_file): # puts relevant fields in tuples
 
     return info
 
-def _code_gen(diff): # prints C code for writing the diff over CAN
-    print 'waitForPress();'
+def _code_gen(diff, doWait): # prints C code for writing the diff over CAN
+    print 'TxMessage.IDE = CAN_Id_Extended \r'
+    print 'TxMessage.RTR = CAN_RTR_Data\r'
+    if doWait:
+        print 'waitForPress();'
     for item in diff:
         print 'TxMessage.ExtId = %s;\r' % item[1]
         print 'TxMessage.DLC = %s;\r' % item[2]
@@ -33,7 +36,8 @@ def _code_gen(diff): # prints C code for writing the diff over CAN
             print 'TxMessage.Data[%s] = 0x%s;\r' % (i, hexNum)
             i += 1
         print 'CAN_Transmit(CANx, &TxMessage);\r'
-        print 'waitForPress();'
+        if doWait:
+            print 'waitForPress();'
         print '\r\n' # newlines in Windows format :(
 
 if __name__ == '__main__':
@@ -41,6 +45,9 @@ if __name__ == '__main__':
     parser.add_option('-c', '--code-gen', action='store_true',
             default=False, dest='do_codegen', 
             help='generate C code for STM32 boards')
+    parser.add_option('-w', '--wait-stmt', action='store_true',
+            default=False, dest='do_wait',
+            help='puts in statements to wait for button press on stm')
     parser.add_option('-i', '--idle-log', dest='idle_log',
             help='contains frames generated when car is idling')
     parser.add_option('-a', '--action-log', dest='action_log',
@@ -51,7 +58,7 @@ if __name__ == '__main__':
     diff = Diff(options.idle_log, options.action_log)
 
     if options.do_codegen:
-        _code_gen(diff)
+        _code_gen(diff, options.do_wait)
 
     else:
         print 'Frames in action log file that are not in idle log file:'
