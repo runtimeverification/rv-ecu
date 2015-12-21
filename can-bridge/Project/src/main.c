@@ -65,7 +65,8 @@ CAN_InitTypeDef        CAN_InitStructure;
 CAN_FilterInitTypeDef  CAN_FilterInitStructure;
 CanTxMsg TxMessage;
 uint8_t KeyNumber = 0x0;
-extern CanRxMsg RxMessage;
+//extern CanRxMsg RxMessage;
+USART_InitTypeDef USART_InitStructure;
 /* Private function prototypes -----------------------------------------------*/
 void NVIC_Config(void);
 void CAN_Config(void);
@@ -74,6 +75,15 @@ void Init_RxMes(CanRxMsg *RxMessage);
 void Delay(void);
 
 /* Private functions ---------------------------------------------------------*/
+void waitForPress() {
+	while(STM_EVAL_PBGetState(BUTTON_KEY) != KEY_PRESSED)
+	{        
+	}
+	while(STM_EVAL_PBGetState(BUTTON_KEY) != KEY_NOT_PRESSED)
+	{
+
+	}
+}
 
 /**
   * @brief  Main program.
@@ -81,32 +91,20 @@ void Delay(void);
   * @retval None
   */
 int main(void)
-{       
+{
   /* NVIC configuration */
   NVIC_Config();
-
+	// Init LCD
 	STM3210C_LCD_Init();
   LCD_Clear(LCD_COLOR_WHITE);
   LCD_SetBackColor(LCD_COLOR_RED);
   LCD_SetTextColor(LCD_COLOR_GREEN);
-  LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "CAN Bus Messages");
-	
+  LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "RV-CANbridge");
+	// Init Buttons
 	STM_EVAL_PBInit(BUTTON_KEY, BUTTON_MODE_GPIO); 
-
+	//Init CAN receive and interrupts
   CAN_Config();
-  
   CAN_ITConfig(CANx, CAN_IT_FMP0, ENABLE);
-	
-	// #include of frame decoder generated file goes here
-}
-
-void waitForPress() {
-	while(STM_EVAL_PBGetState(BUTTON_KEY) == KEY_PRESSED)
-	{        
-		while(STM_EVAL_PBGetState(BUTTON_KEY) != KEY_NOT_PRESSED)
-		{
-		}
-	}
 }
 
 /**

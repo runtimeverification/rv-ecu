@@ -1,5 +1,5 @@
-can-bridge/Project/examples/
-can-bridge/Project/src/MDK-ARM/STM3210C-EVAL/*
+﻿can-bridge/Project/examples/
+can-bridge/Project/src/MDK-ARM/STM3210C-EVAL/*.crf
 *.swp
 # build artifacts
 *.o

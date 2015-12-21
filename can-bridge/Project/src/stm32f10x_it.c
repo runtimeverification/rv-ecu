@@ -161,36 +161,6 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 void CAN1_RX0_IRQHandler(void)
 #endif
 {
-	uint32_t bytes, id, i;
-	char std_id[20] = {0};
-	char dlc[20] = {0};
-	char data[16] = {0};
-  CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	
-	id = (RxMessage.IDE == CAN_ID_STD) ? RxMessage.StdId : RxMessage.ExtId;
-	if (RxMessage.IDE == CAN_ID_STD) {
-		id = RxMessage.StdId;
-		LCD_DisplayStringLine(LCD_LINE_0, (uint8_t *) "standard");
-	}
-	else {
-		id = RxMessage.ExtId;
-		LCD_DisplayStringLine(LCD_LINE_0, (uint8_t *) "extended");
-	}
-	
-	bytes = snprintf(std_id, 20, "ID - %d", id);
-	if (bytes > 0)
-		LCD_DisplayStringLine(LCD_LINE_1, (uint8_t*) std_id);
-	bytes = snprintf(dlc, 20, "DLC - %d", RxMessage.DLC);
-	if (bytes > 0)
-		LCD_DisplayStringLine(LCD_LINE_2, (uint8_t*) dlc);
-	if (RxMessage.DLC > 0) {
-		for (i = 0; i < RxMessage.DLC;) {
-			bytes = sprintf(data+i*2, "%02X", RxMessage.Data[i]);
-			if (bytes > 0)
-				i++;
-		}
-		LCD_DisplayStringLine(LCD_LINE_3, (uint8_t*) data);
-	}
 	
 }
 
