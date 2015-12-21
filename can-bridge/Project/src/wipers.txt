@@ -1,0 +1,51 @@
+TxMessage.IDE = CAN_Id_Extended;
+TxMessage.RTR = CAN_RTR_Data; 
+TxMessage.ExtId = 0x12F95555;
+TxMessage.DLC = 2;
+TxMessage.Data[0] = 0x5C;
+TxMessage.Data[1] = 0x28;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0x12F85351;
+TxMessage.DLC = 8;
+TxMessage.Data[0] = 0x00;
+TxMessage.Data[1] = 0x21;
+TxMessage.Data[2] = 0x00;
+TxMessage.Data[3] = 0x00;
+TxMessage.Data[4] = 0x00;
+TxMessage.Data[5] = 0x00;
+TxMessage.Data[6] = 0x44;
+TxMessage.Data[7] = 0x50;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0x12F85250;
+TxMessage.DLC = 4;
+TxMessage.Data[0] = 0x78;
+TxMessage.Data[1] = 0x00;
+TxMessage.Data[2] = 0xBF;
+TxMessage.Data[3] = 0x24;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0xAF87110;
+TxMessage.DLC = 3;
+TxMessage.Data[0] = 0x02;
+TxMessage.Data[1] = 0xFE;
+TxMessage.Data[2] = 0x00;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0xAF81111;
+TxMessage.DLC = 2;
+TxMessage.Data[0] = 0x28;
+TxMessage.Data[1] = 0x00;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+

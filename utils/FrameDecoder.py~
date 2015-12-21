@@ -24,7 +24,7 @@ def _process(log_file): # puts relevant fields in tuples
 
 def _code_gen(diff, insert_waits): # prints C code for writing the diff over CAN
     print 'TxMessage.IDE = CAN_Id_Extended;\r'
-    print 'TxMessage.RTR = CAN_RTR_Data; \r'
+    print 'TxMessge.RTR = CAN_RTR_Data; \r'
     for item in diff:
         print 'TxMessage.ExtId = %s;\r' % item[1]
         print 'TxMessage.DLC = %s;\r' % item[2]
