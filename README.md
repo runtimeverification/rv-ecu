@@ -14,13 +14,10 @@ My workflow for reverse engineering is as follows -
 1. Hook up the USB-CANII tool to the CAN wires in the driver window controller
    in Grigore's minivan (see Mitchell wiring diagram)
 2. In the USB-CANII GUI tool select 'Save Real Time', start the car, and wait
-   for a few minutes. Then turn the car off. Save this log as 'idle.txt'
+   for 30 to 60 seconds. Then turn the car off. Save this log as 'idle.csv'
 3. Do the same as above, but instead of waiting, use the component whose traffic
    you want to reverse engineer. 
 4. Use `FrameDecoder.py` with the `-c` option and pipe the output to
    `can-bridge/Project/src`. Open `main.c` in that directory and #include the
     text file you just generated at the bottom of the main function.
 5. Flash the board, hook it up to the CAN wires, and hit 'reset'
-
-Maybe the CANbus Triple we bought will make this easier, but for now, this is
-how we will create the demo.
