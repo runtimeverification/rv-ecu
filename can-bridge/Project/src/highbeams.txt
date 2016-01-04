@@ -1,0 +1,78 @@
+TxMessage.IDE = CAN_Id_Extended;
+TxMessage.RTR = CAN_RTR_Data;
+TxMessage.ExtId = 0x12F85351;
+TxMessage.DLC = 8;
+TxMessage.Data[0] = 0x00;
+TxMessage.Data[1] = 0x01;
+TxMessage.Data[2] = 0x00;
+TxMessage.Data[3] = 0x00;
+TxMessage.Data[4] = 0x00;
+TxMessage.Data[5] = 0x00;
+TxMessage.Data[6] = 0x98;
+TxMessage.Data[7] = 0x90;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0x12F85050;
+TxMessage.DLC = 5;
+TxMessage.Data[0] = 0x00;
+TxMessage.Data[1] = 0x03;
+TxMessage.Data[2] = 0x21;
+TxMessage.Data[3] = 0x00;
+TxMessage.Data[4] = 0x00;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0x12F85351;
+TxMessage.DLC = 8;
+TxMessage.Data[0] = 0x00;
+TxMessage.Data[1] = 0x01;
+TxMessage.Data[2] = 0x00;
+TxMessage.Data[3] = 0x00;
+TxMessage.Data[4] = 0x00;
+TxMessage.Data[5] = 0x00;
+TxMessage.Data[6] = 0x98;
+TxMessage.Data[7] = 0x50;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0x12F85050;
+TxMessage.DLC = 5;
+TxMessage.Data[0] = 0x00;
+TxMessage.Data[1] = 0x03;
+TxMessage.Data[2] = 0x23;
+TxMessage.Data[3] = 0x00;
+TxMessage.Data[4] = 0x00;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0xAF87010;
+TxMessage.DLC = 2;
+TxMessage.Data[0] = 0x02;
+TxMessage.Data[1] = 0x00;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0xAF81111;
+TxMessage.DLC = 2;
+TxMessage.Data[0] = 0x01;
+TxMessage.Data[1] = 0x00;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
+TxMessage.ExtId = 0xEF87310;
+TxMessage.DLC = 4;
+TxMessage.Data[0] = 0xD8;
+TxMessage.Data[1] = 0x01;
+TxMessage.Data[2] = 0x01;
+TxMessage.Data[3] = 0x80;
+CAN_Transmit(CANx, &TxMessage);
+Delay();Delay();Delay(); // jank
+
+
