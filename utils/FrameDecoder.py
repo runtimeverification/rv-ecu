@@ -1,40 +1,43 @@
 #!/usr/bin/python
 from optparse import OptionParser
 
-def Diff(idle_log, action_log): # finds in order diff
-    action_info = _process(open(action_log, 'r'))
+def Diff(idle_log, action_log, ignored_prefixes): # finds ordered diff
+    action_info = _process(open(action_log, 'r'), ignored_prefixes)
     action_set = set(action_info)
-    idle_set = set(_process(open(idle_log, 'r')))
+    idle_set = set(_process(open(idle_log, 'r'), ignored_prefixes))
     uniques = action_set - action_set.intersection(idle_set)
     order = sorted([action_info.index(item) for item in uniques])
     return [action_info[idx] for idx in order]
 
-def _process(log_file): # puts relevant fields in tuples
+def _process(log_file, ignored_prefixes): # puts relevant fields in tuples
     info = list()
     for line in log_file:
         if "Index" in line:
             continue
         fields = [item.strip() for item in line.split(',')]
         try:
-            info.append(tuple([fields[3], fields[4], fields[5], fields[6]]))
+	    if fields[4] not in ignored_prefixes:
+		# TODO do prefix operation
+	        info.append(tuple([fields[3], fields[4], fields[5], fields[6]]))
         except Exception:
-            pass # deals with random garbage USB-CANII puts in log
+	    print 'Warning - error reading %s, debug now' # TODO print line num
+            pass # for random garbage USB-CANII puts in log
 
     return info
 
 def _code_gen(diff): # prints C code for writing the diff over CAN
-    print 'TxMessage.IDE = CAN_Id_Extended;\r'
-    print 'TxMessage.RTR = CAN_RTR_Data; \r'
+    print 'TxMessage.IDE = CAN_Id_Extended;'
+    print 'TxMessage.RTR = CAN_RTR_Data;'
     for item in diff:
-        print 'TxMessage.ExtId = %s;\r' % item[1]
-        print 'TxMessage.DLC = %s;\r' % item[2]
+        print 'TxMessage.ExtId = %s;' % item[1]
+        print 'TxMessage.DLC = %s;' % item[2]
         data = item[3].split('  ')
         i = 0
         for hexNum in data:
-            print 'TxMessage.Data[%s] = 0x%s;\r' % (i, hexNum)
+            print 'TxMessage.Data[%s] = 0x%s;' % (i, hexNum)
             i += 1
-        print 'CAN_Transmit(CANx, &TxMessage);\r'
-	print 'Delay();Delay();Delay(); // jank\r'
+        print 'CAN_Transmit(CANx, &TxMessage);'
+	print 'Delay();Delay();Delay(); // jank'
         print '\r\n' # newlines in Windows format :(
 
 if __name__ == '__main__':
@@ -47,9 +50,13 @@ if __name__ == '__main__':
     parser.add_option('-a', '--action-log', dest='action_log',
             help='contains frames generated when car does action we want to '\
             'reverse engineer')
+    parser.add_option('-r', '--ignore', dest='ignored_prefixes', 
+		    help='comma separated list of prefixes of message IDs to' \
+				    'ignore when generating diff')
     (options, args) = parser.parse_args()
 
-    diff = Diff(options.idle_log, options.action_log)
+    ignored_prefixes = options.ignored_prefixes.split(',')
+    diff = Diff(options.idle_log, options.action_log, ignored_prefixes)
 
     if options.do_codegen:
         _code_gen(diff)
