@@ -2,7 +2,7 @@
 # TODO - clean up ignored id code organization
 from optparse import OptionParser
 
-def diff(idle_log, action_log): # finds ordered diff
+def diff(idle_log, action_log): # returns ordered diff between action and idle
     action_info = _tuplify(open(action_log, 'r'))
     action_set = set(action_info)
     idle_set = set(_tuplify(open(idle_log, 'r')))
@@ -10,9 +10,12 @@ def diff(idle_log, action_log): # finds ordered diff
     order = sorted([action_info.index(item) for item in uniques])
     return [action_info[idx] for idx in order]
 
-def _tuplify(log_file):
+def _tuplify(log_file): # turns log file into list of tuples of relavant fields
     info = list()
-    ignored_ids = tuple(options.ignored_ids.split(','))
+    if options.ignored_ids is '':
+        ignored_ids = ()
+    else:
+        ignored_ids = tuple(options.ignored_ids.split(','))
     for line in log_file:
         if "Index" in line:
             continue
