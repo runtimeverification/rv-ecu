@@ -55,7 +55,7 @@ if __name__ == '__main__':
 				    'ignore when generating diff')
     (options, args) = parser.parse_args()
 
-    if options.ignored_ids not None:
+    if options.ignored_ids is not None:
         ignored_ids = options.ignored_ids.split(',')
     else:
         ignored_ids = []
