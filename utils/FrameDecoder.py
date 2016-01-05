@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# TODO - clean up ignored id code organization
 from optparse import OptionParser
 
 def Diff(idle_log, action_log, ignored_prefixes): # finds ordered diff
@@ -17,7 +18,6 @@ def _process(log_file, ignored_prefixes): # puts relevant fields in tuples
         fields = [item.strip() for item in line.split(',')]
         try:
 	    if fields[4] not in ignored_prefixes:
-		# TODO do prefix operation
 	        info.append(tuple([fields[3], fields[4], fields[5], fields[6]]))
         except Exception:
 	    print 'Warning - error reading %s, debug now' # TODO print line num
@@ -50,13 +50,16 @@ if __name__ == '__main__':
     parser.add_option('-a', '--action-log', dest='action_log',
             help='contains frames generated when car does action we want to '\
             'reverse engineer')
-    parser.add_option('-r', '--ignore', dest='ignored_prefixes', 
-		    help='comma separated list of prefixes of message IDs to' \
+    parser.add_option('-r', '--ignore', dest='ignored_ids', 
+		    help='comma separated list of message IDs to' \
 				    'ignore when generating diff')
     (options, args) = parser.parse_args()
 
-    ignored_prefixes = options.ignored_prefixes.split(',')
-    diff = Diff(options.idle_log, options.action_log, ignored_prefixes)
+    if options.ignored_ids not None:
+        ignored_ids = options.ignored_ids.split(',')
+    else:
+        ignored_ids = []
+    diff = Diff(options.idle_log, options.action_log, ignored_ids)
 
     if options.do_codegen:
         _code_gen(diff)
