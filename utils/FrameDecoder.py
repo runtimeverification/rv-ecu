@@ -2,26 +2,28 @@
 # TODO - clean up ignored id code organization
 from optparse import OptionParser
 
-def Diff(idle_log, action_log, ignored_prefixes): # finds ordered diff
-    action_info = _process(open(action_log, 'r'), ignored_prefixes)
+def diff(idle_log, action_log): # finds ordered diff
+    action_info = _tuplify(open(action_log, 'r'))
     action_set = set(action_info)
-    idle_set = set(_process(open(idle_log, 'r'), ignored_prefixes))
+    idle_set = set(_tuplify(open(idle_log, 'r')))
     uniques = action_set - action_set.intersection(idle_set)
     order = sorted([action_info.index(item) for item in uniques])
     return [action_info[idx] for idx in order]
 
-def _process(log_file, ignored_prefixes): # puts relevant fields in tuples
+def _tuplify(log_file):
     info = list()
+    ignored_ids = tuple(options.ignored_ids.split(','))
     for line in log_file:
         if "Index" in line:
             continue
         fields = [item.strip() for item in line.split(',')]
+        if fields[4].startswith(ignored_ids):
+            continue
+
         try:
-	    if fields[4] not in ignored_prefixes:
-	        info.append(tuple([fields[3], fields[4], fields[5], fields[6]]))
+            info.append(tuple([fields[3], fields[4], fields[5], fields[6]]))
         except Exception:
-	    print 'Warning - error reading %s, debug now' # TODO print line num
-            pass # for random garbage USB-CANII puts in log
+	    print 'Warning - error reading line \n - %s' % line
 
     return info
 
@@ -37,34 +39,30 @@ def _code_gen(diff): # prints C code for writing the diff over CAN
             print 'TxMessage.Data[%s] = 0x%s;' % (i, hexNum)
             i += 1
         print 'CAN_Transmit(CANx, &TxMessage);'
-	print 'Delay();Delay();Delay(); // jank'
+	print 'Delay();Delay();Delay();'
         print '\r\n' # newlines in Windows format :(
 
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('-c', '--code-gen', action='store_true',
-            default=False, dest='do_codegen', 
+            default=False, dest='do_codegen',
             help='generate C code for STM32 boards')
     parser.add_option('-i', '--idle-log', dest='idle_log',
             help='contains frames generated when car is idling')
     parser.add_option('-a', '--action-log', dest='action_log',
             help='contains frames generated when car does action we want to '\
             'reverse engineer')
-    parser.add_option('-r', '--ignore', dest='ignored_ids', 
+    parser.add_option('-r', '--ignore', dest='ignored_ids', default='',
 		    help='comma separated list of message IDs to' \
 				    'ignore when generating diff')
     (options, args) = parser.parse_args()
 
-    if options.ignored_ids is not None:
-        ignored_ids = options.ignored_ids.split(',')
-    else:
-        ignored_ids = []
-    diff = Diff(options.idle_log, options.action_log, ignored_ids)
+    d = diff(options.idle_log, options.action_log)
 
     if options.do_codegen:
-        _code_gen(diff)
+        _code_gen(d)
 
     else:
         print 'Frames in action log file that are not in idle log file:'
-        for item in diff:
+        for item in d:
             print item
