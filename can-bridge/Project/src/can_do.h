@@ -1,10 +1,12 @@
 #ifndef _CAN_DO_H
 #define _CAN_DO_H
 #include "stm32f10x_can.h"
+#include "stm32f10x.h"
 
-typedef enum Component {Wiper, Headlight, NUM_COMPONENTS} Component;
-typedef enum Action {Off, Pulse, Low, Medium, High, NUM_ACTIONS} Action;
-// list allowed ops in order they appear in enum
+// in both of these enums, order matters, so do not change
+typedef enum {Wiper, Headlight, NUM_COMPONENTS} Component;
+typedef enum {Off, Pulse, Low, Medium, High, Auto, NUM_ACTIONS} Action;
 
-int CAN_Do(Component c, Action a, unsigned int times);
+// makes <c> do <a> <times> times 
+int CAN_Do(Component c, Action a, uint32_t times);
 #endif
