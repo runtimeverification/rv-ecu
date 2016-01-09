@@ -161,7 +161,26 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 void CAN1_RX0_IRQHandler(void)
 #endif
 {
-	
+  CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
+  Component c;
+	Action a;
+	if (CAN_Decode(&RxMessage, &c, &a)) {
+		switch (c) {
+			case Headlight:
+				if (a == High)
+					__RVC_WipersHeadlights_headlightsOn();
+				else if (a == Off)
+					__RVC_WipersHeadlights_headlightsOff();
+				break;
+				
+			case Wiper:
+				if (a == High)
+					__RVC_WipersHeadlights_wipersOn();
+				else if (a == Off)
+					__RVC_WipersHeadlights_wipersOff();
+				break;
+		}
+	}
 }
 
 /**
@@ -172,12 +191,7 @@ void CAN1_RX0_IRQHandler(void)
 #ifdef STM32F10X_CL
 void CAN2_RX0_IRQHandler(void)
 {
-  CAN_Receive(CAN2, CAN_FIFO0, &RxMessage);
-  if ((RxMessage.StdId == 0x321)&&(RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 1))
-  {
-    LED_Display(RxMessage.Data[0]);
-    KeyNumber = RxMessage.Data[0];
-  }
+
 }
 #endif
 /******************************************************************************/

@@ -3,8 +3,8 @@
 #include "platform_config.h"
 #include "stm3210c_eval_lcd.h"
 #include "stm32f10x_it.h"
-#include "can_do.h"
 #include <stdio.h>
+#include "__RVC_WipersHeadlights_Monitor.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
   * @{
@@ -46,6 +46,8 @@ CAN_FilterInitTypeDef  CAN_FilterInitStructure;
 CanTxMsg TxMessage;
 uint8_t KeyNumber = 0x0;
 //extern CanRxMsg RxMessage;
+Component c;
+Action a;
 USART_InitTypeDef USART_InitStructure;
 /* Private function prototypes -----------------------------------------------*/
 void NVIC_Config(void);
@@ -53,7 +55,7 @@ void CAN_Config(void);
 void LED_Display(uint8_t Ledstatus);
 void Init_RxMes(CanRxMsg *RxMessage);
 void Delay(void);
-
+void InitAll();
 /* Private functions ---------------------------------------------------------*/
 void waitForPress() {
 	while(STM_EVAL_PBGetState(BUTTON_KEY) != KEY_PRESSED)
@@ -72,19 +74,11 @@ void waitForPress() {
   */
 int main(void)
 {
-  /* NVIC configuration */
-  NVIC_Config();
-	// Init LCD
-	STM3210C_LCD_Init();
-  LCD_Clear(LCD_COLOR_WHITE);
-  LCD_SetBackColor(LCD_COLOR_RED);
-  LCD_SetTextColor(LCD_COLOR_GREEN);
-  LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "RV-CANbridge");
-	// Init Buttons
-	STM_EVAL_PBInit(BUTTON_KEY, BUTTON_MODE_GPIO); 
-	//Init CAN receive and interrupts
-  CAN_Config();
-  CAN_ITConfig(CANx, CAN_IT_FMP0, ENABLE);
+	InitAll();
+	__RVC_WipersHeadlights_reset();
+	while (1) {
+	
+	}
 }
 
 /**
@@ -266,7 +260,7 @@ void LED_Display(uint8_t Ledstatus)
 void Delay(void)
 {
   uint16_t nTime = 0x0000;
-
+	
   for(nTime = 0; nTime <0xFFF; nTime++)
   {
   }
@@ -301,5 +295,21 @@ void assert_failed(uint8_t* file, uint32_t line)
 /**
   * @}
   */
+
+void InitAll() {
+	  /* NVIC configuration */
+  NVIC_Config();
+	// Init LCD
+	STM3210C_LCD_Init();
+  LCD_Clear(LCD_COLOR_WHITE);
+  LCD_SetBackColor(LCD_COLOR_RED);
+  LCD_SetTextColor(LCD_COLOR_GREEN);
+  LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "RV-CANbridge");
+	// Init Buttons
+	STM_EVAL_PBInit(BUTTON_KEY, BUTTON_MODE_GPIO); 
+	//Init CAN receive and interrupts
+  CAN_Config();
+  CAN_ITConfig(CANx, CAN_IT_FMP0, ENABLE);
+}
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
