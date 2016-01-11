@@ -45,9 +45,9 @@ CAN_InitTypeDef        CAN_InitStructure;
 CAN_FilterInitTypeDef  CAN_FilterInitStructure;
 CanTxMsg TxMessage;
 uint8_t KeyNumber = 0x0;
-//extern CanRxMsg RxMessage;
-Component c;
-Action a;
+// jank
+volatile Component c = NUM_COMPONENTS;
+volatile Action a = NUM_ACTIONS;
 USART_InitTypeDef USART_InitStructure;
 /* Private function prototypes -----------------------------------------------*/
 void NVIC_Config(void);
@@ -77,7 +77,16 @@ int main(void)
 	InitAll();
 	__RVC_WipersHeadlights_reset();
 	while (1) {
-	
+		if (c != NUM_COMPONENTS && a != NUM_ACTIONS) {
+			__disable_irq();
+			LCD_DisplayStringLine(LCD_LINE_1, (uint8_t*) "unsafe state");
+			CAN_Do(c,a,1);
+			__enable_irq();
+			Delay();
+		}
+		else {
+			LCD_DisplayStringLine(LCD_LINE_1, (uint8_t*) "safe state");
+		}
 	}
 }
 
@@ -304,7 +313,7 @@ void InitAll() {
   LCD_Clear(LCD_COLOR_WHITE);
   LCD_SetBackColor(LCD_COLOR_RED);
   LCD_SetTextColor(LCD_COLOR_GREEN);
-  LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "RV-CANbridge");
+  LCD_DisplayStringLine(LCD_LINE_0, (uint8_t*) "RV-CANbridge");
 	// Init Buttons
 	STM_EVAL_PBInit(BUTTON_KEY, BUTTON_MODE_GPIO); 
 	//Init CAN receive and interrupts
