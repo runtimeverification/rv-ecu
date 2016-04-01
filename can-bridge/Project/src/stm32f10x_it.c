@@ -161,9 +161,9 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 void CAN1_RX0_IRQHandler(void)
 #endif
 {
-  CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-  Component c;
+	Component c;
 	Action a;
+  CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
 	if (CAN_Decode(&RxMessage, &c, &a)) {
 		switch (c) {
 			case Headlight:

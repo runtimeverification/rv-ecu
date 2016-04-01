@@ -420,6 +420,16 @@
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
             </File>
+            <File>
+              <FileName>__RVC_WipersHeadlights_Monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\__RVC_WipersHeadlights_Monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>can_do.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\can_do.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2112,6 +2122,16 @@
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
             </File>
+            <File>
+              <FileName>__RVC_WipersHeadlights_Monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\__RVC_WipersHeadlights_Monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>can_do.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\can_do.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3623,6 +3643,16 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>__RVC_WipersHeadlights_Monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\__RVC_WipersHeadlights_Monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>can_do.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\can_do.c</FilePath>
             </File>
           </Files>
         </Group>

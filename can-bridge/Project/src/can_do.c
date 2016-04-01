@@ -60,7 +60,7 @@ static void writeFrame(CANOpData *op, uint32_t dataInd) {
 // some state for effecient book keeping
 static CANOpData *ops[NUM_COMPONENTS];
 static int opsLoaded = FALSE;
-static inline void loadOps() {
+static void loadOps() {
 	ops[Wiper] = &wiperData;
 	ops[Headlight] = &headlightData;
 	opsLoaded = TRUE;
