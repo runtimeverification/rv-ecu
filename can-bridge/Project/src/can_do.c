@@ -151,22 +151,22 @@ int CAN_Decode(CanRxMsg *msg, Component *c, Action *a) {
 	
 	*a = Off;  
 	if ((*c) == Brake) {
-		if (msg->Data[5] == 0x01 || msg->Data[6] >= 0x7A)
+		if (msg->Data[5] == 0x01 || msg->Data[6] >= 0x7A) {
 			*a = High;
-	}
-	else if ((*c) == Pedal) {
-		if (msg->Data[1] >= 0x22)
-			*a = High;
-		else
-			*a = Off;
-	}
-	else {
-		for (;(*a) < NUM_ACTIONS; (*a)++) {
-			if(!memcmp(msg->Data, ops[*c]->Data[*a], 8))
-				break;
-			if ((*a) == NUM_ACTIONS)
-				return FALSE;
 		}
+		return TRUE;
+	}
+	if ((*c) == Pedal) {
+		if (msg->Data[1] >= 0x22) {
+			*a = High;
+		}
+		return TRUE;
+	}
+	for (;(*a) < NUM_ACTIONS; (*a)++) {
+		if(!memcmp(msg->Data, ops[*c]->Data[*a], 8))
+			break;
+		if ((*a) == NUM_ACTIONS)
+			return FALSE;
 	}
 	return TRUE;
 }

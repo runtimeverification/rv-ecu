@@ -47,8 +47,7 @@ CAN_FilterInitTypeDef  CAN_FilterInitStructure;
 CanTxMsg TxMessage;
 uint8_t KeyNumber = 0x0;
 // jank
-volatile Component c = NUM_COMPONENTS;
-volatile Action a = NUM_ACTIONS;
+volatile uint32_t StateUnsafe = 0;
 USART_InitTypeDef USART_InitStructure;
 /* Private function prototypes -----------------------------------------------*/
 void NVIC_Config(void);
@@ -79,10 +78,11 @@ int main(void)
 	__RVC_Brake_While_Accelerate_reset();
 	LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "safe state");
 	while(1) {
-		if (c != NUM_COMPONENTS && a != NUM_ACTIONS) {
+		if (StateUnsafe) {
 			break;
 		}
 	}
+	LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "           ");
 	LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "unsafe state");
 	while(1) {
 		CAN_Do(Pedal, Off, 1);

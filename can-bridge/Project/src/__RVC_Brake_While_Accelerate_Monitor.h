@@ -1,0 +1,14 @@
+#ifndef __RVC_BRAKE_WHILE_ACCELERATE_MONITOR_H
+#define __RVC_BRAKE_WHILE_ACCELERATE_MONITOR_H
+void
+__RVC_Brake_While_Accelerate_reset(void);
+void
+__RVC_Brake_While_Accelerate_throttle_low();
+void
+__RVC_Brake_While_Accelerate_brake_low();
+void
+__RVC_Brake_While_Accelerate_throttle_high();
+void
+__RVC_Brake_While_Accelerate_brake_high();
+
+#endif

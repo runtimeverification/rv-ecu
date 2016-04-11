@@ -165,9 +165,6 @@ void CAN1_RX0_IRQHandler(void)
 	Component c;
 	Action a;
   CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	if (RxMessage.StdId == 0x1AA)
-		LCD_DisplayStringLine(LCD_LINE_8, (uint8_t*) "fuck the police");
-
 	if (CAN_Decode(&RxMessage, &c, &a)) {
 		switch(c) {
 			case Pedal:
@@ -175,7 +172,6 @@ void CAN1_RX0_IRQHandler(void)
 					__RVC_Brake_While_Accelerate_throttle_low();
 				else if (a == High)
 					__RVC_Brake_While_Accelerate_throttle_high();
-				break;
 			case Brake:
 				if (a == Off)
 					__RVC_Brake_While_Accelerate_brake_low();

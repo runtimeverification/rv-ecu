@@ -421,11 +421,6 @@
               <FilePath>..\main.c</FilePath>
             </File>
             <File>
-              <FileName>__RVC_WipersHeadlights_Monitor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\__RVC_WipersHeadlights_Monitor.c</FilePath>
-            </File>
-            <File>
               <FileName>can_do.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\can_do.c</FilePath>
@@ -2128,11 +2123,6 @@
               <FilePath>..\main.c</FilePath>
             </File>
             <File>
-              <FileName>__RVC_WipersHeadlights_Monitor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\__RVC_WipersHeadlights_Monitor.c</FilePath>
-            </File>
-            <File>
               <FileName>can_do.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\can_do.c</FilePath>
@@ -3653,11 +3643,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>__RVC_WipersHeadlights_Monitor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\__RVC_WipersHeadlights_Monitor.c</FilePath>
             </File>
             <File>
               <FileName>can_do.c</FileName>
