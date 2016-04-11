@@ -430,6 +430,11 @@
               <FileType>1</FileType>
               <FilePath>..\can_do.c</FilePath>
             </File>
+            <File>
+              <FileName>__RVC_Brake_While_Accelerate_Monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\__RVC_Brake_While_Accelerate_Monitor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2132,6 +2137,11 @@
               <FileType>1</FileType>
               <FilePath>..\can_do.c</FilePath>
             </File>
+            <File>
+              <FileName>__RVC_Brake_While_Accelerate_Monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\__RVC_Brake_While_Accelerate_Monitor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3653,6 +3663,11 @@
               <FileName>can_do.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\can_do.c</FilePath>
+            </File>
+            <File>
+              <FileName>__RVC_Brake_While_Accelerate_Monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\__RVC_Brake_While_Accelerate_Monitor.c</FilePath>
             </File>
           </Files>
         </Group>

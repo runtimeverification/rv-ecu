@@ -5,7 +5,7 @@
 #include <string.h>
 
 // in both of these enums, order matters, so do not change
-typedef enum {Wiper, Headlight, NUM_COMPONENTS} Component;
+typedef enum {Wiper, Headlight, Pedal, Brake, NUM_COMPONENTS} Component;
 typedef enum {Off, Pulse, Low, Medium, High, Auto, NUM_ACTIONS} Action;
 
 // makes <c> do <a> <times> times 

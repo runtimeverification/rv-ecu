@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "stm3210c_eval_lcd.h"
+#include "__RVC_Brake_While_Accelerate_Monitor.h"
 #include <stdio.h>
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
@@ -164,23 +165,25 @@ void CAN1_RX0_IRQHandler(void)
 	Component c;
 	Action a;
   CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
+	if (RxMessage.StdId == 0x1AA)
+		LCD_DisplayStringLine(LCD_LINE_8, (uint8_t*) "fuck the police");
+
 	if (CAN_Decode(&RxMessage, &c, &a)) {
-		switch (c) {
-			case Headlight:
-				if (a == High)
-					__RVC_WipersHeadlights_headlightsOn();
-				else if (a == Off)
-					__RVC_WipersHeadlights_headlightsOff();
+		switch(c) {
+			case Pedal:
+				if (a == Off)
+					__RVC_Brake_While_Accelerate_throttle_low();
+				else if (a == High)
+					__RVC_Brake_While_Accelerate_throttle_high();
 				break;
-				
-			case Wiper:
-				if (a == High)
-					__RVC_WipersHeadlights_wipersOn();
-				else if (a == Off)
-					__RVC_WipersHeadlights_wipersOff();
+			case Brake:
+				if (a == Off)
+					__RVC_Brake_While_Accelerate_brake_low();
+				else if (a == High)
+					__RVC_Brake_While_Accelerate_brake_high();
 				break;
+			}
 		}
-	}
 }
 
 /**

@@ -5,6 +5,7 @@
 #include "stm32f10x_it.h"
 #include <stdio.h>
 #include "__RVC_WipersHeadlights_Monitor.h"
+#include "__RVC_Brake_While_Accelerate_Monitor.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
   * @{
@@ -75,18 +76,16 @@ void waitForPress() {
 int main(void)
 {
 	InitAll();
-	__RVC_WipersHeadlights_reset();
-	while (1) {
+	__RVC_Brake_While_Accelerate_reset();
+	LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "safe state");
+	while(1) {
 		if (c != NUM_COMPONENTS && a != NUM_ACTIONS) {
-			__disable_irq();
-			LCD_DisplayStringLine(LCD_LINE_1, (uint8_t*) "unsafe state");
-			CAN_Do(c,a,1);
-			__enable_irq();
-			Delay();
+			break;
 		}
-		else {
-			LCD_DisplayStringLine(LCD_LINE_1, (uint8_t*) "safe state");
-		}
+	}
+	LCD_DisplayStringLine(LCD_LINE_5, (uint8_t*) "unsafe state");
+	while(1) {
+		CAN_Do(Pedal, Off, 1);
 	}
 }
 
@@ -146,7 +145,7 @@ void CAN_Config(void)
   CAN_InitStructure.CAN_SJW = CAN_SJW_1tq;
   CAN_InitStructure.CAN_BS1 = CAN_BS1_3tq;
   CAN_InitStructure.CAN_BS2 = CAN_BS2_2tq; //was _5tq
-  CAN_InitStructure.CAN_Prescaler = 48; // was 4
+  CAN_InitStructure.CAN_Prescaler = 12; // was 4
   CAN_Init(CANx, &CAN_InitStructure);
 
   /* CAN filter init */
@@ -269,7 +268,6 @@ void LED_Display(uint8_t Ledstatus)
 void Delay(void)
 {
   uint16_t nTime = 0x0000;
-	
   for(nTime = 0; nTime <0xFFF; nTime++)
   {
   }
@@ -292,6 +290,8 @@ void assert_failed(uint8_t* file, uint32_t line)
   /* Infinite loop */
   while (1)
   {
+		CAN_Do(Pedal, Low, 1);
+		Delay();
   }
 }
 
