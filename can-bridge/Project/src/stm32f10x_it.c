@@ -42,6 +42,8 @@
 CanRxMsg RxMessage;
 extern uint8_t KeyNumber;
 extern void LED_Display(uint8_t Ledstatus);
+
+static int num_pedal_messages = 0;
  
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -164,14 +166,20 @@ void CAN1_RX0_IRQHandler(void)
 {
 	Component c;
 	Action a;
-  CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
+	CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
 	if (CAN_Decode(&RxMessage, &c, &a)) {
 		switch(c) {
 			case Pedal:
+				// Process smaller sample of frequent pedal messages
+				num_pedal_messages++;
+				if (num_pedal_messages < 5):
+					break;
+				num_pedal_messages = 0;
 				if (a == Off)
 					__RVC_Brake_While_Accelerate_throttle_low();
 				else if (a == High)
 					__RVC_Brake_While_Accelerate_throttle_high();
+				break;
 			case Brake:
 				if (a == Off)
 					__RVC_Brake_While_Accelerate_brake_low();
