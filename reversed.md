@@ -24,3 +24,9 @@ DLC - 2 for both
 | low (notch one)    | 40 00         | 48 48          | 
 | auto (notch two)   | 10 04         | 42 48          |
 | high (notch three) | 50 00         | 42 48          |
+
+# Left rear door
+This one requires sending a cycle of commands  
+CAN ID - EF1296  
+DLC - 1  
+Messages: Send C2, then C3  
