@@ -30,3 +30,9 @@ This one requires sending a cycle of commands
 CAN ID - EF1296  
 DLC - 1  
 Messages: Send C2, then C3  
+
+# Key lock/unlock button
+CAN ID - EF81296
+DLC - 1
+Lock: 01
+Unlock: 02
