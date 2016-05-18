@@ -27,7 +27,7 @@ DLC - 2 for both
 
 # Left rear door
 This one requires sending a cycle of commands  
-CAN ID - EF1296  
+CAN ID - EF81296  
 DLC - 1  
 Messages: Send C2, then C3  
 
