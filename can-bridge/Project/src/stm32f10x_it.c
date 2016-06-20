@@ -24,8 +24,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "stm3210c_eval_lcd.h"
-#include "__RVC_Brake_While_Accelerate_Monitor.h"
 #include <stdio.h>
+#include "__RVC_DoorLocks_Monitor.h"
+
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
   * @{
@@ -162,28 +163,42 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 void CAN1_RX0_IRQHandler(void)
 #endif
 {
-	Component c;
+	uint8_t open = 0;
+  Component c;
 	Action a;
   CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	if (RxMessage.StdId == 0x1AA)
-		LCD_DisplayStringLine(LCD_LINE_8, (uint8_t*) "fuck the police");
-
 	if (CAN_Decode(&RxMessage, &c, &a)) {
-		switch(c) {
-			case Pedal:
-				if (a == Off)
-					__RVC_Brake_While_Accelerate_throttle_low();
-				else if (a == High)
-					__RVC_Brake_While_Accelerate_throttle_high();
+		switch (c) {
+			case Headlight:
+				if (a == High)
+					__RVC_WipersHeadlights_headlightsOn();
+				else if (a == Off)
+					__RVC_WipersHeadlights_headlightsOff();
 				break;
-			case Brake:
-				if (a == Off)
-					__RVC_Brake_While_Accelerate_brake_low();
-				else if (a == High)
-					__RVC_Brake_While_Accelerate_brake_high();
+				
+			case Wiper:
+				if (a == High)
+					__RVC_WipersHeadlights_wipersOn();
+				else if (a == Off)
+					__RVC_WipersHeadlights_wipersOff();
 				break;
-			}
+							
+			case Door:
+				if (a == Actuate && open) {
+					__RVC_DoorLocks_doorClose();
+					open = 0;
+				}
+				else if (a == Actuate && !open) {
+					__RVC_DoorLocks_doorOpen();
+					open = 1;
+				}
+				else if (a == Lock)
+					__RVC_DoorLocks_doorLock();
+				else if (a == Unlock)
+					__RVC_DoorLocks_doorUnlock();
+				break;
 		}
+	}
 }
 
 /**

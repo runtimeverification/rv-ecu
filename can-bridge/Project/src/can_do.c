@@ -29,31 +29,17 @@ static CANOpData wiperData =
 	}
 };
 
-static CANOpData pedalData = 
+static CANOpData doorData = 
 {
-	0x13A,
-	8,
+	0xEF81296,
+	1,
 	{
-		{0x00,0x00,0x80,0x00,0x00,0x00,0x00,0x0A},
+		{0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+		{0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 		NO_OP_DATA,
-		{0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x39},
-		{0x00, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24},
-		{0x00, 0x3B, 0x80, 0x00, 0x00, 0x00, 0x00, 0x31},
-		NO_OP_DATA
-	}
-};
-
-static CANOpData brakeData = 
-{
-	0x1AA,
-	8,
-	{
-		{0x7F, 0xFF, 0x03, 0x00, 0x00, 0x00, 0x69, 0x1C},
 		NO_OP_DATA,
-		{0x7F, 0xFF, 0x03, 0x00, 0x00, 0x00, 0x76, 0x2D},
-		{0x7F, 0xFF, 0x03, 0x00, 0x00, 0x00, 0x8A, 0x28},
-		{0x7F, 0xFF, 0x03, 0x00, 0x00, 0x00, 0x94, 0x3C},
-		NO_OP_DATA
+		NO_OP_DATA,
+		{0xC1,0x00,0x00,0x00,0x00,0x00,0x00,0x00}
 	}
 };
 
@@ -71,13 +57,14 @@ static CANOpData headlightData =
 	}
 };
 
+
 static void writeFrame(CANOpData *op, uint32_t dataInd) {
 	CanTxMsg msg;
 	int i = 0;
 	
 	msg.IDE = CAN_Id_Extended;
 	msg.RTR = CAN_RTR_Data;
-	msg.StdId = op->ID;
+	msg.ExtId = op->ID;
 	msg.DLC = op->DLC;
 	for (; i < 8; i++) {
 		msg.Data[i] = op->Data[dataInd][i]; 
@@ -91,22 +78,9 @@ static int opsLoaded = FALSE;
 static void loadOps() {
 	ops[Wiper] = &wiperData;
 	ops[Headlight] = &headlightData;
-	ops[Pedal] = &pedalData;
-	ops[Brake] = &brakeData;
+	ops[Door] = &doorData;
 	opsLoaded = TRUE;
 }	
-
-static void _Decode_Linear(Component c, uint8_t index, uint8_t data, Action *a) {
-	uint8_t cutoff = ops[c]->Data[Medium][index];
-	if (data < cutoff)
-		*a = Low;
-	cutoff = ops[c]->Data[High][index];
-	if (data < cutoff)
-		*a =Medium;
-	if (data >= cutoff)
-		*a = High;
-}
-
 
 int CAN_Do(Component c, Action a, unsigned int times) {
 	uint8_t *data;
@@ -119,6 +93,12 @@ int CAN_Do(Component c, Action a, unsigned int times) {
 	if (c >= NUM_COMPONENTS || a >= NUM_ACTIONS)
 		return FALSE;
 	
+/*	if (c == Door && a == Actuate) {
+		writeFrame(ops[c], Actuate);
+		writeFrame(ops[c], High);
+		return TRUE;
+	}
+*/
 	// check if component can even do specified action
 	data = ops[c]->Data[a];
 	for (; i < 8; i++) {
@@ -142,31 +122,21 @@ int CAN_Decode(CanRxMsg *msg, Component *c, Action *a) {
 	// set correct component for c
 	*c = Wiper;
 	for (; (*c) < NUM_COMPONENTS; (*c)++) {
-		if (msg->ExtId == ops[*c]->ID || msg->StdId == ops[*c]->ID) {
+		if (msg->ExtId == ops[*c]->ID) {
 			break;
 		}
 		if ((*c) == NUM_COMPONENTS - 1)
 			return FALSE;
 	}
 	
-	*a = Off;  
-	if ((*c) == Brake) {
-		if (msg->Data[5] == 0x01 || msg->Data[6] >= 0x7A)
-			*a = High;
+	*a = Off;
+	for (;(*a) < NUM_ACTIONS; (*a)++) {
+		if(!memcmp(msg->Data, ops[*c]->Data[*a], 8))
+			break;
 	}
-	else if ((*c) == Pedal) {
-		if (msg->Data[1] >= 0x22)
-			*a = High;
-		else
-			*a = Off;
-	}
-	else {
-		for (;(*a) < NUM_ACTIONS; (*a)++) {
-			if(!memcmp(msg->Data, ops[*c]->Data[*a], 8))
-				break;
-			if ((*a) == NUM_ACTIONS)
-				return FALSE;
-		}
-	}
+	
+	if ((*a) == NUM_ACTIONS)
+		return FALSE;
+	
 	return TRUE;
 }
