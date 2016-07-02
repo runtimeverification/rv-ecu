@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{Reverse Engineering CAN 101}
+\author{Bhargava Manja}
+\maketitle
+
+\textit{Disclaimer: This is more an art than a science}
+
+First, I will explain how CAN works for different parts of the car in different
+regimes to help you reason about CAN, then detail my techniques for reverse
+engineering.
+
+\section{CAN}
+\subsection{Introduction}
+Electronic control units (ECUs) control most functions of modern vehicles. They
+are small embedded computers that all talk to one another with a controller
+area network (CAN), sort of like a LAN. The difference between LAN networking
+and CAN networking is that all CAN devices are connected to all other CAN devices
+because they are all connected to a common CAN bus. ECUs communicate over this
+bus via CAN frames, the CAN analogue to an ethernet packet. If every ECU can
+hear all the talk over the CAN bus, how does an ECU know which frames are meant
+for it to listen and respond to? Each CAN frame begins with an id that uniquely
+identifies the ECU that is meant to recieve the frame. Each frame also has
+a body, which contains data for the recipient. 
+
+\subsection{Frames}
+There are two kinds of frames: standard and extended. The only difference
+between the two is that extended frames have longer ids and more room for data.
+All ECUs on a bus must be using the same kind of frame. I have wasted hours not
+being able to communicate over a bus before realizing I am sending extended
+frames on a standard CAN network.
+
+\subsection{Frequency}
+ECUs are configured to communicate over the CAN bus via a specific frequency.
+That is, if I have one CAN bus with two ECUs, they must be configured to
+communicate with the same frequency. You can think of frequency like language
+in that two ECUs on two different frequencies can't understand one another.
+
+\section{Grigore's car}
+Grigore's car actually contains 2 CAN networks. One is the body CAN, or BCAN,
+over which most components of the car communicate. For example, the headlights
+and windshield wiper ECUs are on the BCAN. They work like so:
+\begin{enumerate}
+\item{when a driver turns the blinker on, they change the state on a control
+   ECU under the steering wheel}
+\item{the control ECU sends a stream of messages to the headlight ECU. These 
+   messages each say the same thing, which amounts to "turn left blinker on" 
+   (for example). This sort of message is a \textbf{stream message}. If only one is
+   sent, the blinker will only turn on for a fraction of a second. The control
+   ECU must continue to send messages for the blinker to continue to blink.}
+\item{If the driver turns off the blinker and turns on high beams, the control ECU
+   ends the first stream and
+   sends another stream to the same headlight ECU, this time with a different
+   data field indicating a different action (high beams vs blinkers).}
+\end{enumerate}
+The BCAN operates at 125 kbps, and uses extended frames.
+
+The other network is the fast CAN, or FCAN. FCAN connects components that can
+not be obstructed, and must operate quickly. For example, FCAN connects your
+pedal to the engine. FCAN on Grigore's car operates at 500 kbps and uses
+standard frames. 
+
+\subsection{Atomic Messages}
+The door open and close functionality does not use stream messages, but uses
+\textbf{atomic messages}. That is, one message is sufficient to open or close the
+door. There may be other such exceptions, but this is the only one so far.
+The door open/close buttons on the driver dash are actually wired straight to
+the motors of the car and don't use CAN. The key open/close buttons send
+a radio signal to an ECU that always stays on and sends a single open/close
+message to the door ECU
+
+\section{Reverse Engineering}
+To reverse engineer a function of the car, you need to find out \textbf{the ID of the
+ECU that controls that function} and the \textbf{data payload to trigger that function}. 
+Then you can send a frame over the bus with the proper ID and payload to
+activate that function. To determine both of these, I do the following:
+\begin{enumerate}
+\item{Connect the USB-CANII tool to a CAN splice}
+\item{Start the CANDebug software tool and record the target vehicle function's
+CAN trace}
+\item{Run the FrameDecoder tool to find candidate ECU ids for further
+inspection}
+\item{Use CANDebug's \textit{display filter} and \textit{summary display}
+capabilities to winnow down the list of possible ECU ids}
+\end{enumerate}
+
+I assume you can do number 1, and will explain the rest below:
+\subsection{Recording Traces via CANDebug}
+First, click "Save Real Time" and choose a file name. Then click "Start" and 
+choose the appropriate parameter for baudrate, and click "Ok".
+\end{figure}
+
+Perform the target function (e.g turn the windshield wipers on or clock the
+door lock button on the key). Through some trail and error I have determined
+the following heuristic best practices:
+\begin{itemize}
+\item{Do not collect target logs for longer than 10 seconds. I usually stick to
+between 3 and 5}
+\item{record multiple target logs}
+\item{Before each recording, I turn the car off, turn it on (ignition), wait
+for a few seconds, and begin recording}
+\end{itemize}
+
+\subsection{Finding Candidate ECUs}
+Before you continue, open up your logs and delete the first 3 lines of each.
+They are gunk that will cause the FrameDecoder tool to fail. The help text of
+FrameDecoder:
+\begin{verbatim}
+  -h, --help            show this help message and exit
+  -c, --code-gen        generate C code for STM32 boards
+  -i IDLE_LOG, --idle-log=IDLE_LOG
+                        contains frames generated when car is idling
+  -a ACTION_LOG, --action-log=ACTION_LOG
+                        contains frames generated when car does action we want
+                        to reverse engineer
+  -r IGNORED_IDS, --ignore=IGNORED_IDS
+                        comma separated list of message IDs toignore when
+                        generating diff
+\end{verbatim}
+This tool takes an \textit{idle log} (a CAN trace of the car idling) and an
+\textit{action log} (a log of the target action taking place, what you have
+just recorded) and returns a list of CAN frames that are in the action log but
+are not in the idle log, in the order in which they occur. This is a candidate
+list of ECUs that might control the target function. 
+
+Now, we must pare this list down. First, reconnect to the vehicle. 
+
+
+\end{document}
