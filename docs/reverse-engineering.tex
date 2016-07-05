@@ -7,8 +7,6 @@
 \author{Bhargava Manja}
 \maketitle
 
-\textit{Disclaimer: This is more an art than a science}
-
 First, I will explain how CAN works for different parts of the car in different
 regimes to help you reason about CAN, then detail my techniques for reverse
 engineering.
@@ -23,7 +21,7 @@ because they are all connected to a common CAN bus. ECUs communicate over this
 bus via CAN frames, the CAN analogue to an ethernet packet. If every ECU can
 hear all the talk over the CAN bus, how does an ECU know which frames are meant
 for it to listen and respond to? Each CAN frame begins with an id that uniquely
-identifies the ECU that is meant to recieve the frame. Each frame also has
+identifies the ECU that is meant to receive the frame. Each frame also has
 a body, which contains data for the recipient. 
 
 \subsection{Frames}
@@ -44,17 +42,17 @@ Grigore's car actually contains 2 CAN networks. One is the body CAN, or BCAN,
 over which most components of the car communicate. For example, the headlights
 and windshield wiper ECUs are on the BCAN. They work like so:
 \begin{enumerate}
-\item{when a driver turns the blinker on, they change the state on a control
-   ECU under the steering wheel}
-\item{the control ECU sends a stream of messages to the headlight ECU. These 
+\item when a driver turns the blinker on, they change the state on a control
+   ECU under the steering wheel
+\item the control ECU sends a stream of messages to the headlight ECU. These 
    messages each say the same thing, which amounts to "turn left blinker on" 
    (for example). This sort of message is a \textbf{stream message}. If only one is
    sent, the blinker will only turn on for a fraction of a second. The control
-   ECU must continue to send messages for the blinker to continue to blink.}
-\item{If the driver turns off the blinker and turns on high beams, the control ECU
+   ECU must continue to send messages for the blinker to continue to blink.
+\item If the driver turns off the blinker and turns on high beams, the control ECU
    ends the first stream and
    sends another stream to the same headlight ECU, this time with a different
-   data field indicating a different action (high beams vs blinkers).}
+   data field indicating a different action (high beams vs blinkers).
 \end{enumerate}
 The BCAN operates at 125 kbps, and uses extended frames.
 
@@ -78,30 +76,29 @@ ECU that controls that function} and the \textbf{data payload to trigger that fu
 Then you can send a frame over the bus with the proper ID and payload to
 activate that function. To determine both of these, I do the following:
 \begin{enumerate}
-\item{Connect the USB-CANII tool to a CAN splice}
-\item{Start the CANDebug software tool and record the target vehicle function's
-CAN trace}
-\item{Run the FrameDecoder tool to find candidate ECU ids for further
-inspection}
-\item{Use CANDebug's \textit{display filter} and \textit{summary display}
-capabilities to winnow down the list of possible ECU ids}
+\item Connect the USB-CANII tool to a CAN splice
+\item Start the CANDebug software tool and record the target vehicle function's
+CAN trace
+\item Run the FrameDecoder tool to find candidate ECU ids for further
+inspection
+\item Use CANDebug's \textit{display filter} and \textit{summary display}
+capabilities to winnow down the list of possible ECU ids
 \end{enumerate}
 
 I assume you can do number 1, and will explain the rest below:
 \subsection{Recording Traces via CANDebug}
 First, click "Save Real Time" and choose a file name. Then click "Start" and 
 choose the appropriate parameter for baudrate, and click "Ok".
-\end{figure}
 
 Perform the target function (e.g turn the windshield wipers on or clock the
 door lock button on the key). Through some trail and error I have determined
 the following heuristic best practices:
 \begin{itemize}
-\item{Do not collect target logs for longer than 10 seconds. I usually stick to
-between 3 and 5}
-\item{record multiple target logs}
-\item{Before each recording, I turn the car off, turn it on (ignition), wait
-for a few seconds, and begin recording}
+\item Do not collect target logs for longer than 10 seconds. I usually stick to
+between 3 and 5
+\item record multiple target logs
+\item Before each recording, I turn the car off, turn it on (ignition), wait
+for a few seconds, and begin recording
 \end{itemize}
 
 \subsection{Finding Candidate ECUs}
@@ -113,7 +110,7 @@ FrameDecoder:
   -c, --code-gen        generate C code for STM32 boards
   -i IDLE_LOG, --idle-log=IDLE_LOG
                         contains frames generated when car is idling
-  -a ACTION_LOG, --action-log=ACTION_LOG
+ -a ACTION_LOG, --action-log=ACTION_LOG
                         contains frames generated when car does action we want
                         to reverse engineer
   -r IGNORED_IDS, --ignore=IGNORED_IDS
@@ -126,7 +123,41 @@ just recorded) and returns a list of CAN frames that are in the action log but
 are not in the idle log, in the order in which they occur. This is a candidate
 list of ECUs that might control the target function. 
 
-Now, we must pare this list down. First, reconnect to the vehicle. 
+Now, we must pare this list down. Remember, what we want is the specific
+ECU id and payload that activates a particular function of the vehicle. Let us
+assume that we have some way, in CANDebug, to filter log output by CAN id. That
+is, we can set CANDebug to only show messages to particular ids. Then, we could do the
+target action manually (say, by turning on the car's headlights) and see if any
+messages to our filtered ids show up. We can discard the ids that don't show
+up, and focus on those that do. Fortunately this is not a hypothetical
+scenario - CANDebug includes an option to filter log messages by CAN id! The
+"Open" menu contains a "Set display filter" option which allows you to specify
+CAN ids, and clicking "enable display filter" in the main toolbar will only
+show messages to those ids. 
 
+Of the CAN ids that survive the initial filtering process, only one will be the correct
+CAN id, so the other messages to other ids are unrelated, tangentially related,
+or random. Successive iterations of this filter and log loop will make it
+obvious which messages are random and unrelated. The harder ids to eliminate
+are those with function related to the target function. What we can  do now
+that we have a smaller set of candidate CAN ids is to take each candidate id
+and payload and \textit{send} it over the vehicle's CAN bus somehow. Messages
+that have no effect can be discarded. Again, CANDebug provides a "Send CAN
+frame" dialog that allows you to send standard and extended frames with
+arbitrary ids and payloads, and has a host of options for cycling messages,
+sleeping between messages, etc. Here you must be \textbf{careful}: it is
+possible to throw away the correct CAN id and payload thinking they have no
+effect. Test each one carefully, trying out various send parameters. Try
+sending the same message multiple times in a row with varying inter-message
+pauses, or cycle the message. Be very sure it does not have the desired effect
+before discarding it. 
+
+CANDebug's \textit{summary display} feature may be of help here. Normally
+CANDebug will display each received message on a new line, making it difficult
+to correlate action to log message. By clocking "CAN 1 Summary Display" in the
+open menu, you can change the UI to better facilitate the correlation between
+CAN message and action. In the summary display, each unique id in your filter
+has its own line, and displays that id's last received message, flashing when
+a new message to that id is sent (read by USB-CANII). 
 
 \end{document}
